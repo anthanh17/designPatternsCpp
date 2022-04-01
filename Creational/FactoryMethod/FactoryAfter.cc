@@ -1,9 +1,11 @@
 #include <iostream>
 #include <vector>
+
 class Product {
 public:
     virtual ~Product() = default;
     virtual void Operation() const = 0;
+    static Product *FactoryMethod(int choice);
 };
 
 class Product01 final : public Product {
@@ -20,6 +22,13 @@ public:
     }
 };
 
+Product *Product::FactoryMethod(int choice){
+    if (choice == 1)
+        return new Product01;
+    else if (choice == 2)
+        return new Product02;
+}
+
 int main() {
     std::vector<Product*> array;
     int choice;
@@ -28,10 +37,7 @@ int main() {
         std::cin >> choice;
         if (choice == 0)
             break;
-        else if (choice == 1)
-            array.push_back(new Product01);
-        else if (choice == 2)
-            array.push_back(new Product02);
+        array.push_back(Product::FactoryMethod(choice));
     }
 
     for (const auto &i : array){
