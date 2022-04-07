@@ -1,10 +1,11 @@
 #include <iostream>
 #include <string>
 #include <mutex>
+#include <memory>
 
 class Database {
 private:
-	static Database* _instancePtr;
+	static std::shared_ptr<Database> _instancePtr;
 	int _record{};
 	std::string _name{};
 	static std::mutex _locker;
@@ -13,6 +14,7 @@ private:
 		_name = name;
 		_record = 0;
 	}
+	friend std::shared_ptr<Database> std::make_shared<Database>(std::string&);
 public:
 	void editRecord (std::string operation) {
 		std::cout << "Performing a " << operation
@@ -22,21 +24,22 @@ public:
 
 	std::string getName(void) const { return _name; }
 	
-	static Database* getInstance (std::string name) {
+	static std::shared_ptr<Database> getInstance (std::string name) {
+	    //std::lock_guard<std::mutex> lock(_locker);
 		_locker.lock();
 		if (nullptr == _instancePtr)
-			_instancePtr = new Database (name);
+			_instancePtr = std::make_shared<Database> (name);
 		_locker.unlock();
 		return _instancePtr;
 	}
 };
 
-Database* Database::_instancePtr {nullptr};
+std::shared_ptr<Database> Database::_instancePtr {nullptr};
 std::mutex Database::_locker;
 
 int main() {
 
-	Database* database;
+	std::shared_ptr<Database> database;
 
 	// Init Products obj
 	database = Database::getInstance("Products");
